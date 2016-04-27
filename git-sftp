@@ -1,0 +1,89 @@
+#!/bin/bash
+#setting php-cgi.exe
+phpCGI='C:/xampp/php/php-cgi.exe'
+
+#setting autoUploadWithGit path
+autoUploadPath='D:/git/github/AutoUploadWithGit/action.php'
+
+function showHelp(){
+    echo -e ""
+    echo -e "The most commonly used git-sftp command are:"
+    echo -e "  \e[1;37m[-help]\e[0;37m     Lists available subcommands and some concept guides"
+    echo -e "  \e[1;37m[-def]\e[0;37m      Show default between commits, commit and working tree"
+    echo -e "  \e[1;37m[-p file]\e[0;37m   Upload file from working tree"
+    echo -e "  \e[1;37m[<commit> <commit>]\e[0;37m   Upload file between commits, commit and working tree"
+    echo -e ""
+}
+
+function showDefault(){
+    echo -e ""
+    echo -e "\e[1;37m[1] git diff --name-only\e[0;37m"
+    git diff --name-only
+    echo -e ""
+    
+    echo -e "\e[1;37m[2] git diff --name-only HEAD\e[0;37m"
+    git diff --name-only HEAD
+    
+    echo -e ""
+    echo -e "\e[1;37m[3] git diff --name-only HEAD HEAD^\e[0;37m"
+    git diff --name-only HEAD HEAD^
+    
+    echo -e ""
+    echo -e "\e[1;37m[4] git diff --name-only HEAD^ HEAD^^\e[0;37m"
+    git diff --name-only HEAD^ HEAD^^
+    echo -e ""
+}
+
+if [ "$arg_cmd1" == "-help" ]; then
+    showHelp
+elif [ "$arg_cmd1" == "-def" ]; then
+    showDefault
+    read -p "plz input> " inputCommand
+    if [ "$inputCommand" = "1" ]; then
+        arg_cmd2=''
+        arg_cmd3=''
+    elif [ "$inputCommand" = "2" ]; then
+        arg_cmd2='HEAD'
+        arg_cmd3=''
+    elif [ "$inputCommand" = "3" ]; then
+        arg_cmd2='HEAD'
+        arg_cmd3='HEAD^'
+    elif [ "$inputCommand" = "4" ]; then
+        arg_cmd2='HEAD^'
+        arg_cmd3='HEAD^^'
+    else
+        exit 0
+    fi
+    resultString=$(git diff --name-only $arg_cmd2 $arg_cmd3)
+elif [ "$arg_cmd1" == "-p" ]; then
+    resultString=$arg_file
+else
+    resultString=$(git diff --name-only $arg_cmd2 $arg_cmd3)
+    exit 0
+fi
+
+
+if [ "$resultString" == "" ]; then
+    echo -e ""
+    echo -e "\e[1;37mNot found files.\e[0;37m" 
+    exit 0
+fi
+
+echo -e ""
+echo -e ""
+echo -e "========================"
+echo -e "\e[1;37mUpload files:"
+echo -e ""
+echo "$resultString"
+echo -e "\e[0;37m========================"
+echo -e ""
+read -p "Are you continue to upload? (y/n):" uploadCommand
+echo -e ""
+
+if [ "$uploadCommand" == "y" -o "$uploadCommand" == "Y" ]; then
+    echo $resultString | "$phpCGI" "$autoUploadPath" upload inputBySFTP "$arg_env"
+    echo -e ""
+else
+    echo -e ""
+    exit 0
+fi
