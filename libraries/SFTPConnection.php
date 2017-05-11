@@ -7,6 +7,7 @@ use \AutoUploadWithGit\config\Constants;
 set_include_path(Constants::LIB_PATH . '/phpseclib');
 require_once 'Net/SSH2.php';
 require_once 'Net/SFTP.php';
+require_once 'Crypt/RSA.php';
 
 require_once Constants::LIB_PATH . '/BaseConnection.php';
 require_once Constants::EXCEPTION_PATH . '/ConnectionException.php';
@@ -29,8 +30,11 @@ class SFTPConnection extends BaseConnection{
         if(empty($config)){
             throw new ConnectionException(102);
         } else if(empty($config['connect'])){
+            $key = new \Crypt_RSA();
+            $key->setPassword('whatever');
+            $key->loadKey(file_get_contents($config['pwd']));
             $config['connect'] = new \Net_SFTP($config['host'], $config['port']);
-            $login = $config['connect']->login($config['user'], $config['pwd']);
+            $login = $config['connect']->login($config['user'], $key);
             if(!$login){
                 throw new ConnectionException(103);
             }
@@ -44,6 +48,7 @@ class SFTPConnection extends BaseConnection{
      * @see \AutoUploadWithGit\libraries\BaseConnection::upload()
      */
     public function upload($local, $remote){
+        $this->choiceConnect->chdir('/root');
         $local = sprintf('%s/%s', Constants::GIT_ROOT_PATH, $local);
         $remote = sprintf('%s/%s', Constants::SFTP_ROOT_PATH, $remote);
         $dirs = explode('/', $remote);
