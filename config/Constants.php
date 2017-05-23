@@ -14,9 +14,9 @@ class Constants{
     const LIB_PATH         = LIB_PATH;
     const EXCEPTION_PATH   = EXCEPTION_PATH;
 
-    const GIT_ROOT_PATH    = 'D:\git\github\AutoUploadWithGit';
+    const GIT_ROOT_PATH    = 'D:/git';
 
-    const SFTP_ROOT_PATH   = 'prod';
+    const SFTP_ROOT_PATH   = '../home/wwwroot/default';
 
     public function getConnectInfo(){
         return ;

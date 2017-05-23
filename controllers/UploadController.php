@@ -19,7 +19,7 @@ class UploadController{
      * 
      * @param unknown $env[0] choice target
      */
-    public function actionInputBySFTP($env = [])
+    public function actionInputBySFTP($env = [], $project = '')
     {
         $connection = new SFTPConnection();
 
@@ -30,7 +30,13 @@ class UploadController{
 
             $fileInfo = $connection->patternFileInfo($file);
 
-            $connection->upload($file, $file);
+            $remote = str_replace('paygame.kiyu.tw', 'test.kiyu.tw', $project .'/' . $file);
+            $r = $connection->upload($project .'/' . $file, $remote);
+            if($r){
+                echo $project .'/' . $file . ' - successed '. PHP_EOL;
+            }else{
+                echo $project .'/' . $file . ' - failed '. PHP_EOL;
+            }
         }
     }
 
